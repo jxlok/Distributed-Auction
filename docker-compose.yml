@@ -46,7 +46,15 @@ services:
         networks:
             - auction_system
 
-
+    auction_service:
+        build:
+            context: auctionservice
+            dockerfile: ./Dockerfile
+        container_name: auction_service
+        hostname: auction_service
+        restart: unless-stopped
+        networks:
+            - auction_system
 #   from Kafka Docker Single-node official example:
 #   https://github.com/apache/kafka/blob/trunk/docker/examples/jvm/single-node/plaintext/docker-compose.yml
 
