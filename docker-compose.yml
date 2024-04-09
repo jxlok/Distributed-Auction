@@ -2,7 +2,8 @@ version: '3'
 networks:
     auction_system:
         driver: bridge
-
+volumes:
+    mysql-data:
 services:
     bid_service_nginx:
         image: nginx:stable-alpine3.17-slim
@@ -55,7 +56,27 @@ services:
         restart: unless-stopped
         networks:
             - auction_system
-#   from Kafka Docker Single-node official example:
+        environment:
+            MYSQL_HOST: mysql
+            MYSQL_PORT: 3306
+            MYSQL_USER: root
+            MYSQL_PASSWORD: root_password
+            MYSQL_DATABASE: auction_db
+        depends_on:
+            - mysql
+
+    mysql:
+        image: mysql:latest
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+        volumes:
+            - "mysql-data:/var/lib/mysql"
+            - "./init/:/docker-entrypoint-initdb.d/"
+        networks:
+            - auction_system
+
+    #   from Kafka Docker Single-node official example:
 #   https://github.com/apache/kafka/blob/trunk/docker/examples/jvm/single-node/plaintext/docker-compose.yml
 
     broker:
@@ -108,7 +129,3 @@ services:
             echo -e 'Successfully created the following topics:'
             /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --list
             "
-        
-
-
-        
