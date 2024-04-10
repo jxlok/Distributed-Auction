@@ -3,10 +3,13 @@ USE auction_db;
 
 CREATE TABLE current_bids (
       itemID INT AUTO_INCREMENT PRIMARY KEY,
-      offerPrice INT,
+      startTime TIMESTAMP NOT NULL,
+      endTime TIMESTAMP NOT NULL,
+      offerPrice INT NOT NULL,
+      bidTime TIMESTAMP NOT NULL,
       userID VARCHAR(255) NOT NULL
 );
 
-INSERT INTO current_bids(itemID, offerPrice, userID) VALUES (1, 200, "Jingyi");
-INSERT INTO current_bids(itemID, offerPrice, userID) VALUES (2, 500, "Jason");
-INSERT INTO current_bids(itemID, offerPrice, userID) VALUES (3, 123, "Haocheng");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (1, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 200, CURRENT_TIMESTAMP, "Jingyi");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (2, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 500, CURRENT_TIMESTAMP, "Jason");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (3, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 123, CURRENT_TIMESTAMP, "Haocheng");
