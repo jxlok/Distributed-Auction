@@ -10,19 +10,17 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import service.core.BidOffer;
-import service.core.BidOfferDeserializer;
-import service.core.BidOfferSerializer;
+import service.core.*;
 
 import java.sql.*;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Properties;
-import java.time.LocalDateTime;
 
 public class AuctionService {
 
-    private Producer<String, BidOffer> producer;
+    private final Producer<String, BidUpdate> producer;
     private final KafkaConsumer<String, BidOffer> consumer;
     private final String jdbcUrl;
     private final String username;
@@ -48,7 +46,7 @@ public class AuctionService {
         //Reduce the no of requests less than 0
         producerProps.put("linger.ms", 1);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BidOfferSerializer.class.getName());
+        producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, BidUpdateSerializer.class.getName());
 
         this.consumer = new KafkaConsumer<>(consumerProps);
         this.producer = new KafkaProducer<>(producerProps);
@@ -81,15 +79,18 @@ public class AuctionService {
     }
 
     public void processBid(BidOffer newBidOffer) {
-        if(writeToDatabase(newBidOffer)){
-            produceBidOfferToClient(newBidOffer);
+        Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
+
+        if(writeToDatabase(newBidOffer, currentTime)){
+            BidUpdate bidUpdate = new BidUpdate(newBidOffer.getAuctionId(), newBidOffer.getUserId(), newBidOffer.getOfferPrice(), currentTime);
+            produceBidUpdateToClient(bidUpdate);
             //send to pawn.auction.updates for client to read
             System.out.println("Processed updated bid and sent to updateTopic");
         }
     }
 
     // Method to write data to MySQL database
-    public boolean writeToDatabase(BidOffer newBidOffer) {
+    public boolean writeToDatabase(BidOffer newBidOffer, Timestamp currentTime) {
         try (
                 // Create database connection
                 Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
@@ -106,7 +107,6 @@ public class AuctionService {
             result.next();
             BidOffer currentBidOffer = new BidOffer(result.getLong("itemID"), result.getString("userID"), result.getDouble("offerPrice"));
 
-            Timestamp currentTime = Timestamp.valueOf(LocalDateTime.now());
             Timestamp bidEndTime = result.getTimestamp("endTime");
             //Update bid if higher offerPrice
             if(currentTime.before(bidEndTime) && newBidOffer.getOfferPrice() > currentBidOffer.getOfferPrice()){
@@ -124,18 +124,18 @@ public class AuctionService {
         return false;
     }
 
-    public void produceBidOfferToClient(BidOffer bidOffer) {
+    public void produceBidUpdateToClient(BidUpdate bidUpdate) {
         try {
-            ProducerRecord<String, BidOffer> record = new ProducerRecord<>(
+            ProducerRecord<String, BidUpdate> record = new ProducerRecord<>(
                     "pawn.auction.updates",
-                    bidOffer.getAuctionId().toString(),
-                    bidOffer
+                    bidUpdate.getAuctionId().toString(),
+                    bidUpdate
             );
 
             producer.send(record).get();
 
         }catch (Exception e){
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 

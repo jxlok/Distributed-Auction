@@ -72,7 +72,7 @@ services:
             MYSQL_ROOT_PASSWORD: root_password
         volumes:
             - "mysql-data:/var/lib/mysql"
-            - "./init/:/docker-entrypoint-initdb.d/"
+            - "./script/:/docker-entrypoint-initdb.d/"
         networks:
             - auction_system
 
@@ -129,3 +129,4 @@ services:
             echo -e 'Successfully created the following topics:'
             /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --list
             "
+            
