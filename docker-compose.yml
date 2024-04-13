@@ -73,6 +73,7 @@ services:
         volumes:
             - "mysql-data:/var/lib/mysql"
             - "./script/:/docker-entrypoint-initdb.d/"
+            - "./.docker/etc/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf"
         networks:
             - auction_system
 

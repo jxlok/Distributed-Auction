@@ -10,6 +10,6 @@ CREATE TABLE current_bids (
       userID VARCHAR(255) NOT NULL
 );
 
-INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (1, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 200, CURRENT_TIMESTAMP, "jingyi");
-INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (2, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 500, CURRENT_TIMESTAMP, "jason");
-INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (3, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 5 MINUTE), 123, CURRENT_TIMESTAMP, "haocheng");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (1, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 1 DAY), 200, CURRENT_TIMESTAMP, "jingyi");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (2, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 1 DAY), 500, CURRENT_TIMESTAMP, "jason");
+INSERT INTO current_bids(itemID, startTime, endTime, offerPrice, bidTime, userID) VALUES (3, DATE_SUB(NOW(), INTERVAL 5 MINUTE), Date_ADD(NOW(), INTERVAL 1 DAY), 123, CURRENT_TIMESTAMP, "haocheng");

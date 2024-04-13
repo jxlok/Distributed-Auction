@@ -1,1 +1,6 @@
-/Users/iris/Desktop/UCD/stage4-Spring/Distributed_Systems_(COMP30220)/pawn-GroupProject/pawn/auction/core/src/main/java/service/core/BidOffer.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/AuctionItem.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidUpdate.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidOfferSerializer.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidOffer.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidOfferDeserializer.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidUpdateSerializer.java

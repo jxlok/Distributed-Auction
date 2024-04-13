@@ -26,4 +26,9 @@ public final class BidOffer implements Serializable {
         this.userId = userId;
         this.offerPrice = offerPrice;
     }
+
+    @Override
+    public String toString() {
+        return "BidOffer [auctionId=" + auctionId + ", userId=" + userId + ", offerPrice=" + offerPrice + "]";
+    }
 }

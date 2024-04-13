@@ -8,11 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="bid-service" />
         <module name="auction-core" />
+        <module name="auction-service" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="auction-service" options="-parameters" />
       <module name="bid-service" options="-parameters" />
     </option>
   </component>
