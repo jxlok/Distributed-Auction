@@ -8,7 +8,7 @@
     <modules>
         <module>core</module>
         <module>bidservice</module>
-<!--        <module>client</module>-->
+        <module>client</module>
         <module>auctionservice</module>
     </modules>
 </project>

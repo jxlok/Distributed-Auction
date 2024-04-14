@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="client" />
         <module name="bid-service" />
         <module name="auction-core" />
         <module name="auction-service" />
@@ -16,6 +17,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="auction-service" options="-parameters" />
       <module name="bid-service" options="-parameters" />
+      <module name="client" options="-parameters" />
     </option>
   </component>
 </project>

@@ -11,17 +11,17 @@ public final class BidOffer implements Serializable {
         return userId;
     }
 
-    public Double getOfferPrice() {
+    public int getOfferPrice() {
         return offerPrice;
     }
 
     private Long auctionId;
     private String userId;
-    private Double offerPrice;
+    private int offerPrice;
 
     public BidOffer() {}
 
-    public BidOffer(Long auctionId, String userId, Double offerPrice) {
+    public BidOffer(Long auctionId, String userId, int offerPrice) {
         this.auctionId = auctionId;
         this.userId = userId;
         this.offerPrice = offerPrice;

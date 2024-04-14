@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS auction_db;
 CREATE DATABASE IF NOT EXISTS auction_db;
 USE auction_db;
 

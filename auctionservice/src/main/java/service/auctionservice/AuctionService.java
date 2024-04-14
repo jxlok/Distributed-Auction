@@ -122,7 +122,7 @@ public class AuctionService {
 
             //Update bid if higher offerPrice
             if (currentTime.isBefore(auctionItem.getEndTime()) && newBidOffer.getOfferPrice() > auctionItem.getOfferPrice()) {
-                updateStatement.setString(1, newBidOffer.getOfferPrice().toString());
+                updateStatement.setLong(1, newBidOffer.getOfferPrice());
                 updateStatement.setString(2, newBidOffer.getUserId());
                 updateStatement.setTimestamp(3, Timestamp.from(currentTime.toInstant()));
                 updateStatement.setString(4, newBidOffer.getAuctionId().toString());
@@ -143,7 +143,7 @@ public class AuctionService {
         try {
             ProducerRecord<String, BidUpdate> record = new ProducerRecord<>(
                     "pawn.auction.updates",
-                    bidUpdate.getAuctionId().toString(),
+                    Long.toString(bidUpdate.getAuctionId()),
                     bidUpdate
             );
 

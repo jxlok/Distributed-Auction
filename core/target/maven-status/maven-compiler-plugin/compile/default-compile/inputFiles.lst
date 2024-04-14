@@ -4,3 +4,4 @@
 /Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidOffer.java
 /Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidOfferDeserializer.java
 /Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidUpdateSerializer.java
+/Users/cbo/code/iris/auction/pawn/core/src/main/java/service/core/BidUpdateDeserializer.java
