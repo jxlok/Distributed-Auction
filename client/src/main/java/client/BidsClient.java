@@ -71,7 +71,7 @@ public class BidsClient {
                         response.body().string(),
                         typeFactory.constructCollectionType(List.class, AuctionItem.class)
                 );
-                list.forEach(item -> System.out.println(item.toString()));
+                list.forEach(item -> System.out.println(item.toConsoleOutput()));
             }
 
             @Override

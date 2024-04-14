@@ -1,8 +1,12 @@
 package service.core;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 
 public class AuctionItem {
+    private static final String ANSI_RED = "\u001B[1;31m";
+    private static final String ANSI_GREEN = "\u001B[1;32m";
+    private static final String ANSI_RESET = "\u001B[0m";
 
     private int itemID;
     private OffsetDateTime startTime;
@@ -67,5 +71,12 @@ public class AuctionItem {
                 + ", offerPrice=" + offerPrice
                 + ", bidTime=" + bidTime
                 + ", userID=" + userID + "]";
+    }
+
+    public String toConsoleOutput() {
+        var now = OffsetDateTime.now(ZoneId.of("UTC"));
+        var isActive = startTime.isBefore(now) && endTime.isAfter(now);
+
+        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this.toString();
     }
 }
