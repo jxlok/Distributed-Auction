@@ -65,12 +65,13 @@ public class AuctionService {
                 System.getenv("MYSQL_PORT"), System.getenv("MYSQL_DATABASE"));
         this.username = System.getenv("MYSQL_USER");
         this.password = System.getenv("MYSQL_PASSWORD");
-
+        //fork a new thread run kafka consumer
         this.startListening();
     }
 
     public void startListening() {
         // Poll for new messages
+        //new thread to do while loop, otherwise it blocks main thread. springboot can't finish initialisation.
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -88,7 +89,7 @@ public class AuctionService {
                 }
             }
         }).start();
-
+        //back to main thread to continue springboot web application
     }
 
     public void processBid(BidOffer newBidOffer) {

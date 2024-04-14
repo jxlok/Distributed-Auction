@@ -25,7 +25,7 @@ public class Application implements CommandLineRunner {
         Scanner scanner = new Scanner(System.in);
         String command;
         while (true) {
-            System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/refresh]" + ANSI_RESET);
+            System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/refresh/create]" + ANSI_RESET);
             command = scanner.nextLine().trim();
             switch (command) {
                 case "refresh":
@@ -38,8 +38,20 @@ public class Application implements CommandLineRunner {
                     int bidOffer = Integer.parseInt(scanner.nextLine());
                     client.bid(auctionId, bidOffer);
                     break;
+                case "create":
+                    OffsetDateTime bidTime = OffsetDateTime.now(ZoneId.of("UTC"));
+                    System.out.println(ANSI_YELLOW + "[creating] Please enter the usern id: " + ANSI_RESET);
+                    String userID = scanner.nextLine();
+                    System.out.println(ANSI_YELLOW + "[creating] Please enter how long you would like the auction to be(1hour or 2hour): " + ANSI_RESET);
+                    int time = Integer.parseInt(scanner.nextLine());
+                    OffsetDateTime startTime = OffsetDateTime.now(ZoneId.of("UTC"));
+                    OffsetDateTime endTime = startTime.plusHours(time);
+                    System.out.println(ANSI_YELLOW + "[creating] Please enter the price: " + ANSI_RESET);
+                    int offerPrice = Integer.parseInt(scanner.nextLine());
+                    client.createItem(startTime, endTime, offerPrice, bidTime, userID);
+                    break;
                 default:
-                    System.out.println(ANSI_YELLOW + getCurrentTime() + " Invalid command, please try again [bid/refresh]" + ANSI_RESET);
+                    System.out.println(ANSI_YELLOW + getCurrentTime() + " Invalid command, please try again [bid/refresh/create]" + ANSI_RESET);
             }
         }
     }

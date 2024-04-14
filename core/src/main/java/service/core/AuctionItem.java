@@ -14,6 +14,15 @@ public class AuctionItem {
     private int offerPrice;
     private OffsetDateTime bidTime;
     private String userID;
+    public AuctionItem(){}
+    public AuctionItem(int itemID, OffsetDateTime startTime, OffsetDateTime endTime, int offerPrice, OffsetDateTime bidTime, String userID) {
+        this.itemID = itemID;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.offerPrice = offerPrice;
+        this.bidTime = bidTime;
+        this.userID = userID;
+    }
 
     public OffsetDateTime getEndTime() {
         return endTime;

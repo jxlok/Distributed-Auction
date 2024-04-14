@@ -8,7 +8,7 @@ import service.core.AuctionItem;
 
 import java.util.List;
 
-@RestController
+@RestController//main thread run this component
 public class AuctionController {
     private final AuctionService auctionService;
 

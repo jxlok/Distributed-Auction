@@ -37,7 +37,7 @@ curl -X POST localhost:8083/bids -d '{"auctionId": 2, "offerPrice": 520, "userId
     * `bid`: send a new bid for a given item, subsequent prompts will ask for following details:
       1. auction id
       2. new price
-    * you should see bids updates on the console after submitting a new bid.
+    * `create`:create a new item store in the database. follow the hint in console.
 
 
 

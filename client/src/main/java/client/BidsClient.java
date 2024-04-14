@@ -13,6 +13,7 @@ import service.core.AuctionItem;
 import service.core.BidOffer;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
@@ -80,4 +81,31 @@ public class BidsClient {
             }
         });
     }
+    public void createItem(OffsetDateTime startTime, OffsetDateTime endTime, int offerPrice, OffsetDateTime bidTime, String userID) {
+        try {
+            var request = new Request
+                    .Builder()
+                    .post(RequestBody.create(
+                            objectMapper.writeValueAsBytes(new AuctionItem(0, startTime, endTime, offerPrice, bidTime, userID))
+                    ))
+                    .url("http://localhost:8000/auctions")
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+
+            httpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) {
+                    System.out.println(response.isSuccessful() ? "Create Success" : "Create Failed");
+                }
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    System.out.println("Create New Item Failed. Error: " + e.getMessage());
+                }
+            });
+
+        } catch (JsonProcessingException e) {
+            System.out.println("Error while creating bid request, please try again. Error: " + e.getMessage());
+        }
+    }
+
 }
