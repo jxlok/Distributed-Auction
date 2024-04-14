@@ -1,7 +1,0 @@
-service/core/BidOfferSerializer.class
-service/core/BidOffer.class
-service/core/BidUpdateSerializer.class
-service/core/BidUpdateDeserializer.class
-service/core/AuctionItem.class
-service/core/BidUpdate.class
-service/core/BidOfferDeserializer.class

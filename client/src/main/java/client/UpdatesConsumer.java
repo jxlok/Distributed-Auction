@@ -15,8 +15,6 @@ import java.util.Properties;
 
 @Component
 public class UpdatesConsumer {
-    public static final String ANSI_YELLOW = "\u001B[1;33m";
-    public static final String ANSI_RESET = "\u001B[0m";
 
     private final KafkaConsumer<String, BidUpdate> updatesConsumer;
     private final String userId;
@@ -59,10 +57,10 @@ public class UpdatesConsumer {
 
     private String formatBidUpdate(ConsumerRecord<String, BidUpdate> record) {
 
-        return "Recieved a bid update:\n" + ANSI_YELLOW +
+        return "Recieved a bid update:\n" +
                 "[AuctionId: " + record.value().getAuctionId()+ "] " +
                 "Latest Price: " + record.value().getNewBidPrice() + ", " +
                 "Bidder: " + record.value().getUserId() + ", " +
-                "Updated at: " + record.value().getUpdatedTimestamp() + ANSI_RESET;
+                "Updated at: " + record.value().getUpdatedTimestamp();
     }
 }
