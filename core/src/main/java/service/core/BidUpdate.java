@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class BidUpdate implements Serializable {
-    public Long getAuctionId() {
+    public long getAuctionId() {
         return auctionId;
     }
 
@@ -12,24 +12,33 @@ public class BidUpdate implements Serializable {
         return userId;
     }
 
-    public Double getNewBidPrice() {
-        return new_bid_price;
+    public int getNewBidPrice() {
+        return newBidPrice;
     }
 
-    public Timestamp getUpdatedTimestamp() {return updated_timestamp;}
+    public Timestamp getUpdatedTimestamp() {return updatedTimestamp;}
 
-    private Long auctionId;
+    private long auctionId;
     private String userId;
-    private Double new_bid_price;
-    private Timestamp updated_timestamp;
+    private int newBidPrice;
+    private Timestamp updatedTimestamp;
 
     public BidUpdate() {}
 
-    public BidUpdate(Long auctionId, String userId, Double new_bid_price, Timestamp updated_timestamp) {
+    public BidUpdate(Long auctionId, String userId, int newBidPrice, Timestamp updatedTimestamp) {
         this.auctionId = auctionId;
         this.userId = userId;
-        this.new_bid_price = new_bid_price;
-        this.updated_timestamp = updated_timestamp;
+        this.newBidPrice = newBidPrice;
+        this.updatedTimestamp = updatedTimestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "BidUpdate [auctionId=" + auctionId
+                + ", userId=" + userId
+                + ", new_bid_price=" + newBidPrice
+                + ", updated_timestamp=" + updatedTimestamp
+                + "]";
     }
 
 

@@ -1,6 +1,5 @@
 package service.controllers;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +12,9 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 public class BidController {
-    private int port;
     private BidService bidService;
 
-    public BidController(@Value("${server.port}") int port) {
-        this.port = port;
+    public BidController() {
         this.bidService = new BidService();
     }
 
