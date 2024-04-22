@@ -1,7 +1,7 @@
 version: '3'
 networks:
     auction_system:
-        driver: bridge
+        driver: overlay
 volumes:
     mysql-data:
 services:
@@ -73,7 +73,6 @@ services:
         volumes:
             - "mysql-data:/var/lib/mysql"
             - "./script/:/docker-entrypoint-initdb.d/"
-            - "./.docker/etc/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf"
         networks:
             - auction_system
 

@@ -199,7 +199,10 @@ public class AuctionService {
             statement.setInt(3, auctionItem.getOfferPrice());
             statement.setTimestamp(4, Timestamp.from(auctionItem.getBidTime().toInstant()));
             statement.setString(5, auctionItem.getUserID());
-            return statement.execute();
+
+            statement.execute();
+
+            return true;
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             return false;
