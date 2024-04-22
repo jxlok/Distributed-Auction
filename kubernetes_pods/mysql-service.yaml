@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    io.kompose.service: mysql
+    app: mysql
   ports:
     - protocol: TCP
       port: 3306

@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   selector:
-    io.kompose.service: bid-service
+    app: bid-service
   ports:
     - protocol: TCP
       port: 8083

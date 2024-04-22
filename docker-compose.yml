@@ -1,7 +1,7 @@
 version: '3'
 networks:
     auction_system:
-        driver: overlay
+        driver: bridge
 volumes:
     mysql-data:
 services:
