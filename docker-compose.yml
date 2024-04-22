@@ -63,7 +63,8 @@ services:
             MYSQL_PASSWORD: root_password
             MYSQL_DATABASE: auction_db
         depends_on:
-            - mysql
+            mysql:
+                condition: service_healthy
 
     mysql:
         image: mysql:latest
@@ -76,6 +77,11 @@ services:
             - "./.docker/etc/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf"
         networks:
             - auction_system
+        healthcheck:
+            test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=root_password"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
 
 #   from Kafka Docker Single-node official example:
 #   https://github.com/apache/kafka/blob/trunk/docker/examples/jvm/single-node/plaintext/docker-compose.yml

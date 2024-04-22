@@ -5,8 +5,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Calendar;
 import java.util.Scanner;
 
 @SpringBootApplication
@@ -25,12 +30,9 @@ public class Application implements CommandLineRunner {
         Scanner scanner = new Scanner(System.in);
         String command;
         while (true) {
-            System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/refresh/create]" + ANSI_RESET);
+            System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
             command = scanner.nextLine().trim();
             switch (command) {
-                case "refresh":
-                    client.refresh();
-                    break;
                 case "bid":
                     System.out.println(ANSI_YELLOW + "[bidding] Please enter the auction id: " + ANSI_RESET);
                     long auctionId = Long.parseLong(scanner.nextLine());
@@ -39,13 +41,17 @@ public class Application implements CommandLineRunner {
                     client.bid(auctionId, bidOffer);
                     break;
                 case "create":
-                    OffsetDateTime bidTime = OffsetDateTime.now(ZoneId.of("UTC"));
+
+                    Timestamp bidTime = Timestamp.valueOf(OffsetDateTime.now(ZoneId.of("UTC")).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
                     System.out.println(ANSI_YELLOW + "[creating] Please enter the usern id: " + ANSI_RESET);
                     String userID = scanner.nextLine();
                     System.out.println(ANSI_YELLOW + "[creating] Please enter how long you would like the auction to be(1hour or 2hour): " + ANSI_RESET);
                     int time = Integer.parseInt(scanner.nextLine());
-                    OffsetDateTime startTime = OffsetDateTime.now(ZoneId.of("UTC"));
-                    OffsetDateTime endTime = startTime.plusHours(time);
+                    Timestamp startTime = Timestamp.valueOf(OffsetDateTime.now(ZoneId.of("UTC")).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(startTime);
+                    calendar.add(Calendar.HOUR_OF_DAY, time);
+                    Timestamp endTime = new Timestamp(calendar.getTimeInMillis());
                     System.out.println(ANSI_YELLOW + "[creating] Please enter the price: " + ANSI_RESET);
                     int offerPrice = Integer.parseInt(scanner.nextLine());
                     client.createItem(startTime, endTime, offerPrice, bidTime, userID);

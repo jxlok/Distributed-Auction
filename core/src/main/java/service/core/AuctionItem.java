@@ -1,7 +1,12 @@
 package service.core;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class AuctionItem {
     private static final String ANSI_RED = "\u001B[1;31m";
@@ -9,13 +14,13 @@ public class AuctionItem {
     private static final String ANSI_RESET = "\u001B[0m";
 
     private int itemID;
-    private OffsetDateTime startTime;
-    private OffsetDateTime endTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
     private int offerPrice;
-    private OffsetDateTime bidTime;
+    private Timestamp bidTime;
     private String userID;
     public AuctionItem(){}
-    public AuctionItem(int itemID, OffsetDateTime startTime, OffsetDateTime endTime, int offerPrice, OffsetDateTime bidTime, String userID) {
+    public AuctionItem(int itemID, Timestamp startTime, Timestamp endTime, int offerPrice, Timestamp bidTime, String userID) {
         this.itemID = itemID;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -24,11 +29,11 @@ public class AuctionItem {
         this.userID = userID;
     }
 
-    public OffsetDateTime getEndTime() {
+    public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(OffsetDateTime endTime) {
+    public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
     }
 
@@ -40,11 +45,11 @@ public class AuctionItem {
         this.itemID = itemID;
     }
 
-    public OffsetDateTime getStartTime() {
+    public Timestamp getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(OffsetDateTime startTime) {
+    public void setStartTime(Timestamp startTime) {
         this.startTime = startTime;
     }
 
@@ -56,11 +61,11 @@ public class AuctionItem {
         this.offerPrice = offerPrice;
     }
 
-    public OffsetDateTime getBidTime() {
+    public Timestamp getBidTime() {
         return bidTime;
     }
 
-    public void setBidTime(OffsetDateTime bidTime) {
+    public void setBidTime(Timestamp bidTime) {
         this.bidTime = bidTime;
     }
 
@@ -82,10 +87,18 @@ public class AuctionItem {
                 + ", userID=" + userID + "]";
     }
 
-    public String toConsoleOutput() {
-        var now = OffsetDateTime.now(ZoneId.of("UTC"));
-        var isActive = startTime.isBefore(now) && endTime.isAfter(now);
-
+    public String toConsoleOutput() {;
+        var now = OffsetDateTime.now();
+        Instant startInstant = Instant.ofEpochMilli(startTime.getTime());
+        Instant endInstant = Instant.ofEpochMilli(endTime.getTime());
+        var local_start_time = startInstant.atOffset(ZoneId.systemDefault().getRules().getOffset(startInstant));
+        var local_end_time = endInstant.atOffset(ZoneId.systemDefault().getRules().getOffset(endInstant));
+        var isActive = local_start_time.isBefore(now) && local_end_time.isAfter(now);
+        System.out.println(local_start_time.isBefore(now));
+        System.out.println(local_end_time.isAfter(now));
+        System.out.println(now);
+        System.out.println(local_start_time);
+        System.out.println(local_end_time);
         return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this.toString();
     }
 }
