@@ -32,8 +32,10 @@ public class AuctionService {
     private final String jdbcUrl;
     private final String username;
     private final String password;
+    private final List<Timestamp> endTimes;
 
     public AuctionService() {
+
         Properties consumerProps = new Properties();
         //Assign localhost id
         consumerProps.put("bootstrap.servers", "broker:19092");
@@ -66,30 +68,65 @@ public class AuctionService {
                 System.getenv("MYSQL_PORT"), System.getenv("MYSQL_DATABASE"));
         this.username = System.getenv("MYSQL_USER");
         this.password = System.getenv("MYSQL_PASSWORD");
+
+        this.endTimes = new ArrayList<>();
+        for(AuctionItem item : getAllAuctionItems()){
+            endTimes.add(item.getEndTime());
+        }
         //fork a new thread run kafka consumer
         this.startListening();
+        this.checkEndTimes();
         produceBidUpdateToClient();
-        System.out.println("after produce");
+
+    }
+
+    public void checkEndTimes() {
+        // Poll for new messages
+        //new thread to do while loop, otherwise it blocks main thread. springboot can't finish initialisation.
+        new Thread(() -> {
+            try {
+                while (true) {
+                    boolean updated = false;
+                    List<Timestamp> finished = new ArrayList<>();
+                    int index = 0;
+                    for (Timestamp timestamp : endTimes) {
+                        index++;
+                        var now = LocalDateTime.now();
+                        ZoneId zoneId = ZoneId.systemDefault();
+                        var local_end_time = timestamp.toLocalDateTime().atZone(ZoneId.of("UTC")).withZoneSameInstant(zoneId).toLocalDateTime();
+                        if(now.isAfter(local_end_time)){
+                            finished.add(timestamp);
+                            updated=true;
+                        }
+                    }
+                    if(updated){
+                        endTimes.removeAll(finished);
+                        produceBidUpdateToClient();
+                    }
+                    Thread.sleep(2000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+        //back to main thread to continue springboot web application
     }
 
     public void startListening() {
         // Poll for new messages
         //new thread to do while loop, otherwise it blocks main thread. springboot can't finish initialisation.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-                        ConsumerRecords<String, BidUpdate> records = consumer.poll(Duration.ofMillis(1000)); // Timeout in milliseconds
-                        for (ConsumerRecord<String, BidUpdate> record : records) {
-                            BidUpdate bid = record.value();
-                            processBid(bid);
-                            System.out.println("Received message: " + bid.toString());
-                        }
+        new Thread(() -> {
+            try {
+                while (true) {
+                    ConsumerRecords<String, BidUpdate> records = consumer.poll(Duration.ofMillis(1000)); // Timeout in milliseconds
+                    for (ConsumerRecord<String, BidUpdate> record : records) {
+                        BidUpdate bid = record.value();
+                        processBid(bid);
+                        System.out.println("Received message: " + bid.toString());
                     }
-                } finally {
-                    consumer.close();
                 }
+            } finally {
+                consumer.close();
             }
         }).start();
         //back to main thread to continue springboot web application
@@ -99,8 +136,6 @@ public class AuctionService {
 
         if (writeToDatabase(newBidOffer)) {
             produceBidUpdateToClient();
-            //send to pawn.auction.updates for client to read
-            System.out.println("Processed updated bid and sent to updateTopic");
         }
     }
 
@@ -111,7 +146,7 @@ public class AuctionService {
                 Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
                 // Prepare SQL statement
                 PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID);
-                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_BID_PRICE_USER_AND_TIMESTAMP);
+                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_BID_PRICE_USER_AND_TIMESTAMP)
         ) {
             // Set parameter for SQL statement
             statement.setString(1,  Long.toString(newBidOffer.getAuctionId()));
@@ -132,7 +167,7 @@ public class AuctionService {
                 return updateStatement.executeUpdate() > 0;
             }
             else {
-                System.out.println("Failed to update bid price for item:" + newBidOffer.toString() + ", bid is closed or offer price is too low.");
+//                System.out.println("Bid: " + newBidOffer + " did not trigger update to sql.");
                 return false;
             }
         } catch (SQLException e) {
@@ -142,7 +177,6 @@ public class AuctionService {
     }
 
     public void produceBidUpdateToClient() {
-        System.out.println("producing to update topic");
         ObjectMapper mapper = new ObjectMapper();
         try {
             ProducerRecord<String, String> record = new ProducerRecord<>(
@@ -151,7 +185,6 @@ public class AuctionService {
             );
 
             producer.send(record).get();
-            System.out.println("Triggered refresh");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -160,8 +193,8 @@ public class AuctionService {
     public Optional<AuctionItem> getAuctionItemById(int auctionId) {
         try (
                 Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID);
-        ) {
+                PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID)
+            ) {
             statement.setString(1, Integer.toString(auctionId));
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -177,7 +210,7 @@ public class AuctionService {
     public List<AuctionItem> getAllAuctionItems() {
         try (
                 Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                PreparedStatement statement = connection.prepareStatement(QUERY_ALL_ITEMS);
+                PreparedStatement statement = connection.prepareStatement(QUERY_ALL_ITEMS)
         ) {
             ResultSet rs = statement.executeQuery();
             List<AuctionItem> auctionItems = new ArrayList<>();
@@ -193,15 +226,21 @@ public class AuctionService {
 
     public boolean addItem(AuctionItem auctionItem) {
         try (
-                Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                PreparedStatement statement = connection.prepareStatement(INSERT_AUCTION_ITEM);
-                ) {
-            statement.setTimestamp(1, Timestamp.from(auctionItem.getStartTime().toInstant()));
-            statement.setTimestamp(2, Timestamp.from(auctionItem.getEndTime().toInstant()));
+            Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
+            PreparedStatement statement = connection.prepareStatement(INSERT_AUCTION_ITEM)
+            ) {
+            statement.setTimestamp(1, auctionItem.getStartTime());
+            statement.setTimestamp(2, auctionItem.getEndTime());
             statement.setInt(3, auctionItem.getOfferPrice());
-            statement.setTimestamp(4, Timestamp.from(auctionItem.getBidTime().toInstant()));
+            statement.setTimestamp(4, auctionItem.getBidTime());
             statement.setString(5, auctionItem.getUserID());
-            return statement.execute();
+
+            statement.execute();
+
+            produceBidUpdateToClient();
+
+            endTimes.add(auctionItem.getEndTime());
+            return true;
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             return false;

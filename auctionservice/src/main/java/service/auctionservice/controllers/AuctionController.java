@@ -3,7 +3,7 @@ package service.auctionservice.controllers;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import service.auctionservice.AuctionService;
+import service.auctionservice.*;
 import service.core.AuctionItem;
 
 import java.util.List;
@@ -33,5 +33,6 @@ public class AuctionController {
     public ResponseEntity<Void> addAuctionItem(@RequestBody AuctionItem auctionItem) {
         return auctionService.addItem(auctionItem) ?
                 ResponseEntity.ok().build() : ResponseEntity.status(500).build();
+
     }
 }

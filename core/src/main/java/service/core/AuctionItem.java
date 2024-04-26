@@ -1,10 +1,7 @@
 package service.core;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -79,6 +76,7 @@ public class AuctionItem {
 
     @Override
     public String toString() {
+        ZoneId zoneId = ZoneId.systemDefault();
         return "AuctionItem [itemID=" + itemID
                 + ", startTime=" + startTime
                 + ", endTime=" + endTime
@@ -88,17 +86,24 @@ public class AuctionItem {
     }
 
     public String toConsoleOutput() {;
-        var now = OffsetDateTime.now();
-        Instant startInstant = Instant.ofEpochMilli(startTime.getTime());
-        Instant endInstant = Instant.ofEpochMilli(endTime.getTime());
-        var local_start_time = startInstant.atOffset(ZoneId.systemDefault().getRules().getOffset(startInstant));
-        var local_end_time = endInstant.atOffset(ZoneId.systemDefault().getRules().getOffset(endInstant));
-        var isActive = local_start_time.isBefore(now) && local_end_time.isAfter(now);
-        System.out.println(local_start_time.isBefore(now));
-        System.out.println(local_end_time.isAfter(now));
-        System.out.println(now);
-        System.out.println(local_start_time);
-        System.out.println(local_end_time);
-        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this.toString();
+        var now = getCurrentLocalTimestamp();
+        var isActive = startTime.before(now) && endTime.after(now);
+        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this;
+    }
+
+    public static Timestamp getCurrentLocalTimestamp() {
+        // Get current time in UTC timezone
+        long currentMillis = System.currentTimeMillis();
+
+        // Create a Calendar instance and set it to the current time in UTC
+        Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        utcCalendar.setTimeInMillis(currentMillis);
+
+        // Convert to local timezone
+        Calendar localCalendar = Calendar.getInstance();
+        localCalendar.setTimeInMillis(utcCalendar.getTimeInMillis());
+
+        // Get the local timestamp
+        return new Timestamp(localCalendar.getTimeInMillis());
     }
 }

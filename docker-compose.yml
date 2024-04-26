@@ -16,6 +16,8 @@ services:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
             - auction_system
+        depends_on:
+            -   auction_service
 
     bid_service_1:
         build:
@@ -78,10 +80,10 @@ services:
         networks:
             - auction_system
         healthcheck:
-            test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=root_password"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
+            test: ["CMD-SHELL", "mysql -h localhost -u root --password=root_password -e 'USE auction_db;Select * FROM current_bids'"]
+            interval: 5s
+            timeout: 5s
+            retries: 30
 
 #   from Kafka Docker Single-node official example:
 #   https://github.com/apache/kafka/blob/trunk/docker/examples/jvm/single-node/plaintext/docker-compose.yml

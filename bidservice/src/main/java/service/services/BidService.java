@@ -1,19 +1,17 @@
 package service.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import service.core.*;
+import service.core.BidOffer;
+import service.core.BidUpdate;
+import service.core.BidUpdateSerializer;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -43,7 +41,8 @@ public class BidService {
     }
 
     public void submit(BidOffer bidOffer) throws IOException, ExecutionException, InterruptedException {
-        Timestamp currentTime = Timestamp.valueOf(OffsetDateTime.now(ZoneId.of("UTC")).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
+        Timestamp currentTime = Timestamp.from(Instant.now());
+        System.out.println("Update time: "+currentTime);
         BidUpdate bidUpdate = new BidUpdate(bidOffer.getAuctionId(), bidOffer.getUserId(), bidOffer.getOfferPrice(), currentTime);
         System.out.println(bidUpdate);
         ProducerRecord<String, BidUpdate> record = new ProducerRecord<>(
