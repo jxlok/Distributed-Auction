@@ -28,8 +28,8 @@ public class UpdatesConsumer {
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BidUpdateDeserializer.class.getName());
 
-        updatesConsumer = new KafkaConsumer<String, BidUpdate>(consumerProps);
-        updatesConsumer.subscribe(Collections.singletonList("pawn.auction.updates"));
+        updatesConsumer = new KafkaConsumer<>(consumerProps);
+        updatesConsumer.subscribe(Collections.singletonList("pawn.auction.bids"));
         this.pollUpdates();
     }
 

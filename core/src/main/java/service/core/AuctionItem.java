@@ -1,7 +1,9 @@
 package service.core;
 
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
 import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class AuctionItem {
     private static final String ANSI_RED = "\u001B[1;31m";
@@ -9,13 +11,13 @@ public class AuctionItem {
     private static final String ANSI_RESET = "\u001B[0m";
 
     private int itemID;
-    private OffsetDateTime startTime;
-    private OffsetDateTime endTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
     private int offerPrice;
-    private OffsetDateTime bidTime;
+    private Timestamp bidTime;
     private String userID;
     public AuctionItem(){}
-    public AuctionItem(int itemID, OffsetDateTime startTime, OffsetDateTime endTime, int offerPrice, OffsetDateTime bidTime, String userID) {
+    public AuctionItem(int itemID, Timestamp startTime, Timestamp endTime, int offerPrice, Timestamp bidTime, String userID) {
         this.itemID = itemID;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -24,11 +26,11 @@ public class AuctionItem {
         this.userID = userID;
     }
 
-    public OffsetDateTime getEndTime() {
+    public Timestamp getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(OffsetDateTime endTime) {
+    public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
     }
 
@@ -40,11 +42,11 @@ public class AuctionItem {
         this.itemID = itemID;
     }
 
-    public OffsetDateTime getStartTime() {
+    public Timestamp getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(OffsetDateTime startTime) {
+    public void setStartTime(Timestamp startTime) {
         this.startTime = startTime;
     }
 
@@ -56,11 +58,11 @@ public class AuctionItem {
         this.offerPrice = offerPrice;
     }
 
-    public OffsetDateTime getBidTime() {
+    public Timestamp getBidTime() {
         return bidTime;
     }
 
-    public void setBidTime(OffsetDateTime bidTime) {
+    public void setBidTime(Timestamp bidTime) {
         this.bidTime = bidTime;
     }
 
@@ -74,6 +76,7 @@ public class AuctionItem {
 
     @Override
     public String toString() {
+        ZoneId zoneId = ZoneId.systemDefault();
         return "AuctionItem [itemID=" + itemID
                 + ", startTime=" + startTime
                 + ", endTime=" + endTime
@@ -82,10 +85,25 @@ public class AuctionItem {
                 + ", userID=" + userID + "]";
     }
 
-    public String toConsoleOutput() {
-        var now = OffsetDateTime.now(ZoneId.of("UTC"));
-        var isActive = startTime.isBefore(now) && endTime.isAfter(now);
+    public String toConsoleOutput() {;
+        var now = getCurrentLocalTimestamp();
+        var isActive = startTime.before(now) && endTime.after(now);
+        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this;
+    }
 
-        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this.toString();
+    public static Timestamp getCurrentLocalTimestamp() {
+        // Get current time in UTC timezone
+        long currentMillis = System.currentTimeMillis();
+
+        // Create a Calendar instance and set it to the current time in UTC
+        Calendar utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        utcCalendar.setTimeInMillis(currentMillis);
+
+        // Convert to local timezone
+        Calendar localCalendar = Calendar.getInstance();
+        localCalendar.setTimeInMillis(utcCalendar.getTimeInMillis());
+
+        // Get the local timestamp
+        return new Timestamp(localCalendar.getTimeInMillis());
     }
 }
