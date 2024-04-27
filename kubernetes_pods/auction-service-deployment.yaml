@@ -15,6 +15,18 @@ spec:
       labels:
         app: auction-service
     spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:latest
+          command:
+          - sh
+          - -c
+          - |
+            until mysql -u root --password=root_password -h mysql-service -e "use auction_db; select 1 from current_bids;";
+            do
+              echo "Waiting for mysql"
+              sleep 3
+            done
       containers:
         - name: pawn-auction-service
           image: jxlok/pawn-auction-service:1.0

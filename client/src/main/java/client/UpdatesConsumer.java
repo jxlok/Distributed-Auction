@@ -18,6 +18,9 @@ public class UpdatesConsumer {
 
     private final KafkaConsumer<String, BidUpdate> updatesConsumer;
     private final String userId;
+    public static final String ANSI_CYAN = "\u001B[36m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
 
     public UpdatesConsumer(@Value("${userId}") String userId) {
         this.userId = userId;
@@ -28,8 +31,8 @@ public class UpdatesConsumer {
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BidUpdateDeserializer.class.getName());
 
-        updatesConsumer = new KafkaConsumer<String, BidUpdate>(consumerProps);
-        updatesConsumer.subscribe(Collections.singletonList("pawn.auction.updates"));
+        updatesConsumer = new KafkaConsumer<>(consumerProps);
+        updatesConsumer.subscribe(Collections.singletonList("pawn.auction.bids"));
         this.pollUpdates();
     }
 
@@ -41,7 +44,7 @@ public class UpdatesConsumer {
                     while (true) {
                         var records = updatesConsumer.poll(Duration.ofMillis(1000));
                         for (var record : records) {
-                            System.out.println(formatBidUpdate(record));
+                            System.out.println(ANSI_CYAN+formatBidUpdate(record)+ANSI_RESET);
                         }
                     }
                 }  catch (Exception e) {
@@ -57,7 +60,7 @@ public class UpdatesConsumer {
 
     private String formatBidUpdate(ConsumerRecord<String, BidUpdate> record) {
 
-        return "Recieved a bid update:\n" +
+        return "BidOffer:\n" +
                 "[AuctionId: " + record.value().getAuctionId()+ "] " +
                 "Latest Price: " + record.value().getNewBidPrice() + ", " +
                 "Bidder: " + record.value().getUserId() + ", " +

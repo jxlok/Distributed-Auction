@@ -1,19 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bid-service-nginx
+  name: nginx
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bid-service-nginx
+      app: nginx
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: bid-service-nginx
+        app: nginx
     spec:
+      initContainers:
+        - name: wait-for-auction-service
+          image: busybox:latest
+          command: [ 'sh', '-c', 'until nc -z auction-service 8083; do echo "Waiting for auction-service..."; sleep 2.5; done;' ]
+        - name: wait-for-bidservice
+          image: busybox:latest
+          command: [ 'sh', '-c', 'until nc -z bid-service 8083; do echo "Waiting for bid-service..."; sleep 2.5; done;' ]
       containers:
         - name: nginx
           image: nginx:stable-alpine3.17-slim
