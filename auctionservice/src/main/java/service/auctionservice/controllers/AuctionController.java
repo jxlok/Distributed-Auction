@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import service.auctionservice.*;
 import service.core.AuctionItem;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController//main thread run this component
@@ -16,16 +18,8 @@ public class AuctionController {
         this.auctionService = new AuctionService();
     }
 
-    @GetMapping(value = "/auctions/{id}")
-    public ResponseEntity<AuctionItem> createAuctionItem(@PathVariable("id") int auctionId) {
-        var auctionItem = auctionService.getAuctionItemById(auctionId);
-
-        return auctionItem
-                .map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
     @GetMapping(value = "/auctions")
-    public ResponseEntity<List<AuctionItem>> addAuctionItem() {
+    public ResponseEntity<List<AuctionItem>> getAllAuctionItem() {
         return ResponseEntity.ok(auctionService.getAllAuctionItems());
     }
 

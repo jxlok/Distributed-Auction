@@ -26,11 +26,11 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Scanner scanner = new Scanner(System.in);
         String command;
+        System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
+
         while (true) {
-            System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
             command = scanner.nextLine().trim();
 
-            int clearSize = 6;
             switch (command) {
                 case "bid":
 
@@ -41,7 +41,6 @@ public class Application implements CommandLineRunner {
                             auctionId = Long.parseLong(scanner.nextLine());
                         }catch (NumberFormatException e){
                             System.out.println(ANSI_YELLOW+"Invalid format!"+ANSI_RESET);
-                            clearSize+=3;
                         }
                     }
 
@@ -52,16 +51,10 @@ public class Application implements CommandLineRunner {
                             bidOffer = Integer.parseInt(scanner.nextLine());
                         }catch (NumberFormatException e){
                             System.out.println(ANSI_YELLOW+"Invalid format!"+ANSI_RESET);
-                            clearSize+=3;
                         }
                     }
+                    System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
                     client.bid(auctionId, bidOffer);
-                    for(int i=0;i<clearSize;i++){
-                        // Move cursor to the beginning of the first line
-                        System.out.print("\033[F");
-                        // Clear the first line
-                        System.out.print("\033[K");
-                    }
                     break;
                 case "create":
                     int time = 0;
@@ -71,7 +64,6 @@ public class Application implements CommandLineRunner {
                             time = Integer.parseInt(scanner.nextLine());
                         }catch (NumberFormatException e) {
                             System.out.println(ANSI_YELLOW+"Invalid format!"+ANSI_RESET);
-                            clearSize+=3;
                         }
                     }
                     Timestamp startTime = Timestamp.from(Instant.now());
@@ -87,21 +79,14 @@ public class Application implements CommandLineRunner {
                             offerPrice = Integer.parseInt(scanner.nextLine());
                         }catch (NumberFormatException e){
                             System.out.println(ANSI_YELLOW+"Invalid format!"+ANSI_RESET);
-                            clearSize+=3;
                         }
                     }
 
                     Timestamp bidTime = Timestamp.from(Instant.now());
                     client.createItem(startTime, endTime, offerPrice, bidTime, client.getUserId());
-                    for(int i=0;i<clearSize;i++){
-                        // Move cursor to the beginning of the first line
-                        System.out.print("\033[F");
-                        // Clear the first line
-                        System.out.print("\033[K");
-                    }
                     break;
                 default:
-                    System.out.println(ANSI_YELLOW + getCurrentTime() + " Invalid command, please try again [bid/refresh/create]" + ANSI_RESET);
+                    System.out.println(ANSI_YELLOW + getCurrentTime() + " Invalid command, please try again [bid/create]" + ANSI_RESET);
             }
         }
     }

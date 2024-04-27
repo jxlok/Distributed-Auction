@@ -1,7 +1,6 @@
 package service.core;
 
 import java.sql.Timestamp;
-import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -76,7 +75,6 @@ public class AuctionItem {
 
     @Override
     public String toString() {
-        ZoneId zoneId = ZoneId.systemDefault();
         return "AuctionItem [itemID=" + itemID
                 + ", startTime=" + startTime
                 + ", endTime=" + endTime

@@ -11,16 +11,22 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-
-import service.core.*;
+import service.core.AuctionItem;
+import service.core.BidUpdate;
+import service.core.BidUpdateDeserializer;
 
 import java.sql.*;
-import java.time.*;
-import java.util.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 public class AuctionService {
 
-    public static String QUERY_BY_ITEM_ID = "SELECT * FROM current_bids WHERE itemID = ?";
+    public static String QUERY_BY_ITEM_ID = "SELECT * FROM current_bids WHERE itemID = ? FOR UPDATE";
     public static String QUERY_ALL_ITEMS = "SELECT * FROM current_bids";
     public static String INSERT_AUCTION_ITEM =
             "INSERT INTO current_bids (startTime, endTime, offerPrice, bidTime, userID) VALUES (?,?,?,?,?)";
@@ -133,23 +139,30 @@ public class AuctionService {
     }
 
     public void processBid(BidUpdate newBidOffer) {
-
-        if (writeToDatabase(newBidOffer)) {
-            produceBidUpdateToClient();
+        try {
+            if (writeToDatabase(newBidOffer)) {
+                produceBidUpdateToClient();
+            }
+        }catch (SQLException e){
+            System.out.println("SQL connection issue arised.");
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 
     // Method to write data to MySQL database
-    public boolean writeToDatabase(BidUpdate newBidOffer) {
-        try (
-                // Create database connection
-                Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                // Prepare SQL statement
-                PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID);
-                PreparedStatement updateStatement = connection.prepareStatement(UPDATE_BID_PRICE_USER_AND_TIMESTAMP)
-        ) {
+    public boolean writeToDatabase(BidUpdate newBidOffer) throws SQLException {
+        // Create database connection
+        Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
+        try {
+            connection.setAutoCommit(false);
+
+            // Prepare SQL statement
+            PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID);
+            PreparedStatement updateStatement = connection.prepareStatement(UPDATE_BID_PRICE_USER_AND_TIMESTAMP);
+
             // Set parameter for SQL statement
-            statement.setString(1,  Long.toString(newBidOffer.getAuctionId()));
+            statement.setString(1, Long.toString(newBidOffer.getAuctionId()));
 
             // Get current bid in db
             ResultSet result = statement.executeQuery();
@@ -164,15 +177,19 @@ public class AuctionService {
                 updateStatement.setTimestamp(3, Timestamp.from(newBidOffer.getUpdatedTimestamp().toInstant()));
                 updateStatement.setString(4, Long.toString(newBidOffer.getAuctionId()));
 
-                return updateStatement.executeUpdate() > 0;
-            }
-            else {
+                int returnCode = updateStatement.executeUpdate();
+                connection.commit();
+                return returnCode > 0;
+            } else {
 //                System.out.println("Bid: " + newBidOffer + " did not trigger update to sql.");
                 return false;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch (SQLException e){
+            connection.rollback();
+        }finally {
+            connection.close();
         }
+
         return false;
     }
 
@@ -190,57 +207,44 @@ public class AuctionService {
         }
     }
 
-    public Optional<AuctionItem> getAuctionItemById(int auctionId) {
-        try (
-                Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                PreparedStatement statement = connection.prepareStatement(QUERY_BY_ITEM_ID)
-            ) {
-            statement.setString(1, Integer.toString(auctionId));
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                return Optional.of(readAsAuctionItem(rs));
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public List<AuctionItem> getAllAuctionItems() {
-        try (
-                Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
-                PreparedStatement statement = connection.prepareStatement(QUERY_ALL_ITEMS)
-        ) {
+        try {
+            Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
+            PreparedStatement statement = connection.prepareStatement(QUERY_ALL_ITEMS);
+
             ResultSet rs = statement.executeQuery();
+
             List<AuctionItem> auctionItems = new ArrayList<>();
             while (rs.next()) {
                 auctionItems.add(readAsAuctionItem(rs));
             }
 
             return auctionItems;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+        } catch(SQLException e){
+            System.out.println("getAllAuctionItems: Connection to db failed.");
         }
+
+        return new ArrayList<>();
     }
 
     public boolean addItem(AuctionItem auctionItem) {
         try (
             Connection connection = DriverManager.getConnection(this.jdbcUrl, this.username, this.password);
             PreparedStatement statement = connection.prepareStatement(INSERT_AUCTION_ITEM)
-            ) {
-            statement.setTimestamp(1, auctionItem.getStartTime());
-            statement.setTimestamp(2, auctionItem.getEndTime());
-            statement.setInt(3, auctionItem.getOfferPrice());
-            statement.setTimestamp(4, auctionItem.getBidTime());
-            statement.setString(5, auctionItem.getUserID());
+            ){
+                statement.setTimestamp(1, auctionItem.getStartTime());
+                statement.setTimestamp(2, auctionItem.getEndTime());
+                statement.setInt(3, auctionItem.getOfferPrice());
+                statement.setTimestamp(4, auctionItem.getBidTime());
+                statement.setString(5, auctionItem.getUserID());
 
-            statement.execute();
+                statement.execute();
 
-            produceBidUpdateToClient();
+                produceBidUpdateToClient();
 
-            endTimes.add(auctionItem.getEndTime());
-            return true;
+                endTimes.add(auctionItem.getEndTime());
+                return true;
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             return false;

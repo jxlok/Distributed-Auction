@@ -18,6 +18,9 @@ public class UpdatesConsumer {
 
     private final KafkaConsumer<String, BidUpdate> updatesConsumer;
     private final String userId;
+    public static final String ANSI_CYAN = "\u001B[36m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
 
     public UpdatesConsumer(@Value("${userId}") String userId) {
         this.userId = userId;
@@ -41,7 +44,7 @@ public class UpdatesConsumer {
                     while (true) {
                         var records = updatesConsumer.poll(Duration.ofMillis(1000));
                         for (var record : records) {
-                            System.out.println(formatBidUpdate(record));
+                            System.out.println(ANSI_CYAN+formatBidUpdate(record)+ANSI_RESET);
                         }
                     }
                 }  catch (Exception e) {
