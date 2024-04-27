@@ -106,7 +106,7 @@ public class BidsClient {
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) {
-//                    System.out.println(response.isSuccessful() ? "Bid Successfully submitted" : "Bid submitted Failed");
+                    System.out.println(response.isSuccessful() ? "Bid Sent" : "Bid Failed to Send");
                 }
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {

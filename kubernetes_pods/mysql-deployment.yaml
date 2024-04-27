@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: default
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:latest
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root_password
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-data
+            - mountPath: /docker-entrypoint-initdb.d
+              name: init-scripts
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-data
+        - name: init-scripts
+          configMap:
+            name: mysql-init-scripts
+      restartPolicy: Always

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auction-service
+  namespace: default
+  labels:
+    app: auction-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auction-service
+  template:
+    metadata:
+      labels:
+        app: auction-service
+    spec:
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:latest
+          command:
+          - sh
+          - -c
+          - |
+            until mysql -u root --password=root_password -h mysql-service -e "use auction_db; select 1 from current_bids;";
+            do
+              echo "Waiting for mysql"
+              sleep 3
+            done
+      containers:
+        - name: pawn-auction-service
+          image: jxlok/pawn-auction-service:1.0
+          imagePullPolicy: Always
+          env:
+            - name: MYSQL_DATABASE
+              value: auction_db
+            - name: MYSQL_HOST
+              value: mysql-service
+            - name: MYSQL_PASSWORD
+              value: root_password
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: root
+          resources: {}
+      hostname: auction-service
+      restartPolicy: Always

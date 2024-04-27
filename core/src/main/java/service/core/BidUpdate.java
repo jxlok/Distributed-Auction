@@ -2,7 +2,6 @@ package service.core;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.time.OffsetDateTime;
 
 public class BidUpdate implements Serializable {
     public long getAuctionId() {

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    upstream bid-service {
+        server bid-service:8083;
+    }
+
+    upstream auction-service {
+        server auction-service:8083;
+    }
+
+    server {
+        access_log          /var/log/nginx/nginx.vhost.access.log;
+        error_log           /var/log/nginx/nginx.vhost.error.log;
+
+        listen 80;
+
+        location /auctions {
+            proxy_pass          http://auction-service;
+        }
+        location /bids {
+            proxy_pass         http://bid-service;
+        }
+    }

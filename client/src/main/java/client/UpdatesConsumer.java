@@ -60,7 +60,7 @@ public class UpdatesConsumer {
 
     private String formatBidUpdate(ConsumerRecord<String, BidUpdate> record) {
 
-        return "Recieved a bid update:\n" +
+        return "BidOffer:\n" +
                 "[AuctionId: " + record.value().getAuctionId()+ "] " +
                 "Latest Price: " + record.value().getNewBidPrice() + ", " +
                 "Bidder: " + record.value().getUserId() + ", " +

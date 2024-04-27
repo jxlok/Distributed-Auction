@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bid-service
+  namespace: default
+  labels:
+    app: bid-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bid-service
+  template:
+    metadata:
+      labels:
+        app: bid-service
+    spec:
+      containers:
+        - name: pawn-bid-service
+          image: jxlok/pawn-bid-service:1.0
+          imagePullPolicy: Always
+          resources: {}
+      hostname: bid-service
+      restartPolicy: Always
