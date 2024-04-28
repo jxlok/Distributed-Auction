@@ -1,6 +1,9 @@
 package service.auctionservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -11,6 +14,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import service.core.AuctionItem;
 import service.core.BidUpdate;
 import service.core.BidUpdateDeserializer;
@@ -19,12 +24,11 @@ import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class AuctionService {
+    private static final String ZK_CONNECTION_STRING = "zookeeper1:2181"; // ZooKeeper connection string
+    private static final String LEADER_PATH = "/leader"; // Path for leader election
 
     public static String QUERY_BY_ITEM_ID = "SELECT * FROM current_bids WHERE itemID = ? FOR UPDATE";
     public static String QUERY_ALL_ITEMS = "SELECT * FROM current_bids";
@@ -39,6 +43,9 @@ public class AuctionService {
     private final String username;
     private final String password;
     private final List<Timestamp> endTimes;
+
+    private CuratorFramework curatorFramework;
+    private String leaderPath;
 
     public AuctionService() {
 
@@ -81,13 +88,40 @@ public class AuctionService {
         }
         //fork a new thread run kafka consumer
         this.startListening();
-        this.checkEndTimes();
         produceBidUpdateToClient();
 
+        // Initialize CuratorFramework
+        this.curatorFramework = CuratorFrameworkFactory.newClient("zookeeper:2181", new ExponentialBackoffRetry(1000, 3));
+        this.curatorFramework.close();
+        this.curatorFramework.start();
+
+        // Specify leader election path
+        this.leaderPath = "/leader";
+        // Start leader election
+        electLeader();
+    }
+
+    private void electLeader() {
+        System.out.println("Electing leader");
+        try {
+            // Attempt to become the leader by creating an ephemeral znode
+            this.curatorFramework.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(leaderPath);
+            // If znode creation succeeds, this instance becomes the leader
+            System.out.println("I am the leader!");
+            if (this.curatorFramework.checkExists().forPath(leaderPath) != null) {
+                System.out.println("Reached leader");
+                this.checkEndTimes();
+            }
+        } catch (KeeperException.NodeExistsException e) {
+            // If znode creation fails due to node already existing, another instance is already the leader
+            System.out.println("Someone else is the leader!");
+        } catch (Exception e) {
+            // Handle other exceptions
+            e.printStackTrace();
+        }
     }
 
     public void checkEndTimes() {
-        // Poll for new messages
         //new thread to do while loop, otherwise it blocks main thread. springboot can't finish initialisation.
         new Thread(() -> {
             try {
@@ -104,6 +138,7 @@ public class AuctionService {
                         }
                     }
                     if(updated){
+                        System.out.println("Finished auction found.");
                         endTimes.removeAll(finished);
                         produceBidUpdateToClient();
                     }
