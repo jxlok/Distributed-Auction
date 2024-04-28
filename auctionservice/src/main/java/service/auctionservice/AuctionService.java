@@ -16,6 +16,8 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 import service.core.AuctionItem;
 import service.core.BidUpdate;
 import service.core.BidUpdateDeserializer;
@@ -108,15 +110,38 @@ public class AuctionService {
             // If znode creation succeeds, this instance becomes the leader
             System.out.println("I am the leader!");
             if (this.curatorFramework.checkExists().forPath(leaderPath) != null) {
-                System.out.println("Reached leader");
                 this.checkEndTimes();
             }
         } catch (KeeperException.NodeExistsException e) {
             // If znode creation fails due to node already existing, another instance is already the leader
             System.out.println("Someone else is the leader!");
+            watchLeaderNode();
         } catch (Exception e) {
             // Handle other exceptions
             e.printStackTrace();
+        }
+    }
+
+
+    // Watch for changes in leadership status
+    private void watchLeaderNode() {
+        try {
+            // Register a watcher on the leader znode to detect changes in leadership
+            this.curatorFramework.getData().usingWatcher(new LeaderWatcher()).forPath(leaderPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Watcher class to handle changes in leadership status
+    private class LeaderWatcher implements Watcher {
+        @Override
+        public void process(WatchedEvent event) {
+            // Handle changes in leadership status
+            if (event.getType() == Event.EventType.NodeDeleted) {
+                // Leader znode was deleted, indicating a change in leadership
+                electLeader(); // Reattempt leader election
+            }
         }
     }
 
