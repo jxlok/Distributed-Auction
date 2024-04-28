@@ -92,7 +92,6 @@ public class AuctionService {
 
         // Initialize CuratorFramework
         this.curatorFramework = CuratorFrameworkFactory.newClient("zookeeper:2181", new ExponentialBackoffRetry(1000, 3));
-        this.curatorFramework.close();
         this.curatorFramework.start();
 
         // Specify leader election path
