@@ -42,7 +42,7 @@ public class BidService {
 
     public void submit(BidOffer bidOffer) throws IOException, ExecutionException, InterruptedException {
         Timestamp currentTime = Timestamp.from(Instant.now());
-        System.out.println("Update time: "+currentTime);
+//        System.out.println("Update time: "+currentTime);
         BidUpdate bidUpdate = new BidUpdate(bidOffer.getAuctionId(), bidOffer.getUserId(), bidOffer.getOfferPrice(), currentTime);
         System.out.println(bidUpdate);
         ProducerRecord<String, BidUpdate> record = new ProducerRecord<>(
@@ -50,7 +50,7 @@ public class BidService {
                 Long.toString(bidUpdate.getAuctionId()),
                 bidUpdate
         );
-        System.out.println("Sending");
+//        System.out.println("Sending");
         producer.send(record).get();
     }
 }

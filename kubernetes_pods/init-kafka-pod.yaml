@@ -13,7 +13,7 @@ spec:
         - |
           /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --list
           echo 'Creating kafka topics'
-          /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --create --if-not-exists --topic pawn.auction.bids --replication-factor 1 --partitions 1
+          /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --create --if-not-exists --topic pawn.auction.bids --replication-factor 1 --partitions 2
           /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --create --if-not-exists --topic pawn.auction.updates --replication-factor 1 --partitions 1
           echo 'Successfully created the following topics:'
           /opt/kafka/bin/kafka-topics.sh --bootstrap-server broker:19092 --list

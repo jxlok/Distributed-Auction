@@ -22,7 +22,7 @@ spec:
           - sh
           - -c
           - |
-            until mysql -u root --password=root_password -h mysql-service -e "use auction_db; select 1 from current_bids;";
+            until mysql -u root --password=root_password -h mysql -e "use auction_db; select 1 from current_bids;";
             do
               echo "Waiting for mysql"
               sleep 3
@@ -35,7 +35,7 @@ spec:
             - name: MYSQL_DATABASE
               value: auction_db
             - name: MYSQL_HOST
-              value: mysql-service
+              value: mysql
             - name: MYSQL_PASSWORD
               value: root_password
             - name: MYSQL_PORT
