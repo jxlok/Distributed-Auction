@@ -75,18 +75,23 @@ public class AuctionItem {
 
     @Override
     public String toString() {
-        return "AuctionItem [itemID=" + itemID
-                + ", startTime=" + startTime
-                + ", endTime=" + endTime
-                + ", offerPrice=" + offerPrice
-                + ", bidTime=" + bidTime
-                + ", userID=" + userID + "]";
+//        return "[itemID=" + itemID
+//                + ", startTime=" + startTime
+//                + ", endTime=" + endTime
+//                + ", offerPrice=" + offerPrice
+//                + ", bidTime=" + bidTime
+//                + ", userID=" + userID + "]";
+        return String.format("%-6d | %-21s | %-21s | %-10d | %-21s | %-10s |\n",
+                itemID, startTime.toString(), endTime.toString(), offerPrice, bidTime.toString(), userID);
     }
 
     public String toConsoleOutput() {;
         var now = getCurrentLocalTimestamp();
         var isActive = startTime.before(now) && endTime.after(now);
-        return (isActive? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET + this;
+        String status = (isActive ? ANSI_GREEN + "[Active] " : ANSI_RED + "[Inactive] ") + ANSI_RESET;
+        String test = ANSI_RED + "[Inactive] " + ANSI_RESET;
+//        System.out.println(String.format("%-11s|", status));
+        return String.format("%-22s | ", status) + this;
     }
 
     public static Timestamp getCurrentLocalTimestamp() {

@@ -12,22 +12,26 @@ import service.core.BidUpdateDeserializer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.UUID;
 
 @Component
 public class UpdatesConsumer {
 
     private final KafkaConsumer<String, BidUpdate> updatesConsumer;
-    private final String userId;
+    private String userId;
     public static final String ANSI_CYAN = "\u001B[36m";
     private static final String ANSI_RESET = "\u001B[0m";
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public UpdatesConsumer(@Value("${userId}") String userId) {
         this.userId = userId;
         Properties consumerProps = new Properties();
         //Assign localhost id
         consumerProps.put("bootstrap.servers", "localhost:9092");
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "client-" + userId );
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "client-" + UUID.randomUUID());
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BidUpdateDeserializer.class.getName());
 

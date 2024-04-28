@@ -34,12 +34,15 @@ public class BidsClient {
     private final KafkaConsumer<String, String> updateConsumer;
     private final KafkaConsumer<String, BidUpdate> bidsConsumer;
 
-    private final String userId;
+    private String userId;
 
     public String getUserId() {
         return userId;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
     public BidsClient(@Value("${userId}") String userId) {
 
         this.httpClient = new OkHttpClient();
@@ -58,7 +61,7 @@ public class BidsClient {
 
         TopicPartition partition = new TopicPartition("pawn.auction.updates", 0);
         updateConsumer.assign(Collections.singletonList(partition));
-        updateConsumer.seekToBeginning(Collections.singletonList(partition));
+        updateConsumer.seekToEnd(Collections.singletonList(partition));
         long currentOffset = updateConsumer.position(partition);
         // Fetch the last message
         updateConsumer.seek(partition, Math.max(currentOffset - 1, 0)); // Ensure offset is non-negative
@@ -172,9 +175,12 @@ public class BidsClient {
     }
 
     private void outputTable(List<AuctionItem> list){
-        System.out.println("-------------------------------------------------");
-        list.forEach(item -> System.out.println(item.toConsoleOutput()));
-        System.out.println("-------------------------------------------------");
+        // Print the table header
+        System.out.println("-----------------------------------------------------------------------------------------------------------------------");
+        System.out.println("Status      | itemID | startTime             | endTime               | offerPrice | bidTime               | userID     |");
+        System.out.println("-----------------------------------------------------------------------------------------------------------------------");
+        list.forEach(item -> System.out.print(item.toConsoleOutput()));
+        System.out.println("-----------------------------------------------------------------------------------------------------------------------\n");
     }
 
 

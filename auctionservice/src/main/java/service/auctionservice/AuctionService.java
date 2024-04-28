@@ -45,7 +45,7 @@ public class AuctionService {
         Properties consumerProps = new Properties();
         //Assign localhost id
         consumerProps.put("bootstrap.servers", "broker:19092");
-        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "bids");
+        consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "auction-services");
         consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BidUpdateDeserializer.class.getName());
 
@@ -94,9 +94,7 @@ public class AuctionService {
                 while (true) {
                     boolean updated = false;
                     List<Timestamp> finished = new ArrayList<>();
-                    int index = 0;
                     for (Timestamp timestamp : endTimes) {
-                        index++;
                         var now = LocalDateTime.now();
                         ZoneId zoneId = ZoneId.systemDefault();
                         var local_end_time = timestamp.toLocalDateTime().atZone(ZoneId.of("UTC")).withZoneSameInstant(zoneId).toLocalDateTime();
@@ -179,17 +177,15 @@ public class AuctionService {
 
                 int returnCode = updateStatement.executeUpdate();
                 connection.commit();
+                connection.close();
                 return returnCode > 0;
-            } else {
-//                System.out.println("Bid: " + newBidOffer + " did not trigger update to sql.");
-                return false;
             }
         }catch (SQLException e){
             connection.rollback();
-        }finally {
-            connection.close();
         }
 
+        connection.commit();
+        connection.close();
         return false;
     }
 

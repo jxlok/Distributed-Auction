@@ -11,22 +11,26 @@ import java.time.OffsetDateTime;
 import java.util.Calendar;
 import java.util.Scanner;
 
+
 @SpringBootApplication
 public class Application implements CommandLineRunner {
     public static final String ANSI_YELLOW = "\u001B[1;33m";
     public static final String ANSI_RESET = "\u001B[0m";
     @Autowired
-    BidsClient client;
+    private BidsClient bidsClient;
+
+    @Autowired
+    private UpdatesConsumer updatesConsumer;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
+        System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
         Scanner scanner = new Scanner(System.in);
         String command;
-        System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
 
         while (true) {
             command = scanner.nextLine().trim();
@@ -54,7 +58,7 @@ public class Application implements CommandLineRunner {
                         }
                     }
                     System.out.println(ANSI_YELLOW + getCurrentTime() + " Please enter your command: [bid/create]" + ANSI_RESET);
-                    client.bid(auctionId, bidOffer);
+                    bidsClient.bid(auctionId, bidOffer);
                     break;
                 case "create":
                     int time = 0;
@@ -83,7 +87,7 @@ public class Application implements CommandLineRunner {
                     }
 
                     Timestamp bidTime = Timestamp.from(Instant.now());
-                    client.createItem(startTime, endTime, offerPrice, bidTime, client.getUserId());
+                    bidsClient.createItem(startTime, endTime, offerPrice, bidTime, bidsClient.getUserId());
                     break;
                 default:
                     System.out.println(ANSI_YELLOW + getCurrentTime() + " Invalid command, please try again [bid/create]" + ANSI_RESET);
