@@ -66,7 +66,10 @@ and ensure init-kafka is Completed and every other container is running. This ca
 
 ### Start Client
 1. Go back to root folder
-2. Execute 'java -jar ./client/target/auction-client-0.0.1.jar --userId=jingyi --server.port=8080'
+2. Execute 
+```
+java -jar ./client/target/auction-client-0.0.1.jar --userId=jingyi --server.port=8080
+```
 
 #### To note: If changes have been made to the configmaps in nginx-config.yaml or mysql-init-scripts.yaml, removal of the specific configmaps must be done with the following commands.
    ```
