@@ -22,7 +22,9 @@ public class BidController {
     public ResponseEntity<Void> submitBid(
             @RequestBody BidOffer bidOffer) {
         try {
-            bidService.submit(bidOffer);
+            if(bidOffer.getOfferPrice() >= 0){
+                bidService.submit(bidOffer);
+            }
         } catch (IOException e) {
             // return 400 upon json encoding error
             System.out.println("Failed to encode bid message.");
