@@ -49,18 +49,18 @@ kubectl apply -f .
 ```
 4. Check pods are Running using 
 ```
-'kubectl get pods' 
+kubectl get pods
 ```
 and ensure init-kafka is Completed and every other container is running. This can be slow due to the dependencies that exist between our containers.
 
 5. Post forward local machine port 8000->80 in nginx pod
     1. Get ID of nginx pod
    ```
-   'kubectl get pods'
+   kubectl get pods
    ```
    2. In a new command prompt, execute 
    ```
-   'kubectl port-forward <nginx_pod_id> 8000:80'
+   kubectl port-forward <nginx_pod_id> 8000:80
    ```
    3. Do the same for kafka (broker pod) using port mapping: 9092->9092
 
