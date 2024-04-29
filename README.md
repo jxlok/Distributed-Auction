@@ -42,13 +42,12 @@ docker push jxlok/pawn-auction-service:1.0
 3. Repeat steps 1 and 2 for bidservice (jxlok/pawn-bid-service:1.0)
 
 ### Run Kubernetes Deployments, Services, Pods
-1. Run minikube, 
+1. Run minikube in a terminal
 ```
 minikube start
 ```
-in a terminal
 2. Check no existing pods exist with 'kubectl get pods'
-   1. if existing found, run
+   - if existing found, run
    ```
    kubectl delete all --all
    kubectl delete pvc --all
