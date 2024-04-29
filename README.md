@@ -31,12 +31,22 @@ If any changes are made to code, a push of the auction-service and bid-service n
 #### Firstly, package the project using 'mvn clean package'
 
 ### Build and push services to repo if changes has been made
-2. In auctionservice folder, run docker build -t jxlok/pawn-auction-service:1.0 .
-3. Then, docker push jxlok/pawn-auction-service:1.0
-4. Repeat steps 1 and 2 for bidservice (jxlok/pawn-bid-service:1.0)
+1. In auctionservice folder, run
+```
+docker build -t jxlok/pawn-auction-service:1.0 .
+```
+2. Then push to the repo. 
+```
+docker push jxlok/pawn-auction-service:1.0
+```
+3. Repeat steps 1 and 2 for bidservice (jxlok/pawn-bid-service:1.0)
 
 ### Run Kubernetes Deployments, Services, Pods
-1. Run minikube, 'minikube start' in a terminal
+1. Run minikube, 
+```
+minikube start
+```
+in a terminal
 2. Check no existing pods exist with 'kubectl get pods'
    1. if existing found, run
    ```
