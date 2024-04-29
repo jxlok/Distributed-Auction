@@ -77,4 +77,4 @@ kubectl delete configmap nginx-config
 
 ## Report + Video links
 - [Auction Report (PDF)](./Distributed_Report_Pawn.pdf)
-- [Auction Video](./Pawn-DistributedAuction.mp4)
+- [Auction Video](./Pawn-DistributedAuctionDemo.mp4)
